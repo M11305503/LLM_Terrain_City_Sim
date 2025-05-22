@@ -5,10 +5,12 @@ public class BuildableGrid : MonoBehaviour
 {
     [Header("格子設定")]
     public Terrain terrain;
-    public int gridSizeX = 10;
-    public int gridSizeZ = 10;
+    public int gridX = 25;
+    public int gridZ = 25;
     [Range(1f, 60f)]
-    public float maxSlope = 20f; // 允許最大坡度（預設放寬為20）
+    public float maxSlope = 21.5f; // 允許最大坡度（預設放寬為21.5）
+
+    public bool[,] GetBuildableGrid() => buildableGrid;
 
     private bool[,] buildableGrid;
     private TerrainData terrainData;
@@ -26,15 +28,15 @@ public class BuildableGrid : MonoBehaviour
     {
         Vector3 size = terrainData.size;
 
-        buildableGrid = new bool[gridSizeX, gridSizeZ];
+        buildableGrid = new bool[gridX, gridZ];
         int buildableCount = 0;
 
-        for (int x = 0; x < gridSizeX; x++)
+        for (int x = 0; x < gridX; x++)
         {
-            for (int z = 0; z < gridSizeZ; z++)
+            for (int z = 0; z < gridZ; z++)
             {
-                float worldX = (x + 0.5f) / gridSizeX * size.x;
-                float worldZ = (z + 0.5f) / gridSizeZ * size.z;
+                float worldX = (x + 0.5f) / gridX * size.x;
+                float worldZ = (z + 0.5f) / gridZ * size.z;
                 float slope = GetSlope(worldX, worldZ);
 
                 bool isBuildable = slope <= maxSlope;
@@ -44,8 +46,8 @@ public class BuildableGrid : MonoBehaviour
             }
         }
 
-        float percent = (float)buildableCount / (gridSizeX * gridSizeZ) * 100f;
-        Debug.Log($"✅ 可建築格子：{buildableCount}/{gridSizeX * gridSizeZ}（{percent:F1}%）");
+        float percent = (float)buildableCount / (gridX * gridZ) * 100f;
+        Debug.Log($"✅ 可建築格子：{buildableCount}/{gridX * gridZ}（{percent:F1}%）");
     }
 
     float GetSlope(float worldX, float worldZ)
@@ -61,12 +63,12 @@ public class BuildableGrid : MonoBehaviour
         Vector3 pos = terrain.GetPosition();
         Vector3 size = terrain.terrainData.size;
 
-        for (int x = 0; x < gridSizeX; x++)
+        for (int x = 0; x < gridX; x++)
         {
-            for (int z = 0; z < gridSizeZ; z++)
+            for (int z = 0; z < gridZ; z++)
             {
-                float cellX = (x + 0.5f) / gridSizeX * size.x;
-                float cellZ = (z + 0.5f) / gridSizeZ * size.z;
+                float cellX = (x + 0.5f) / gridX * size.x;
+                float cellZ = (z + 0.5f) / gridZ * size.z;
                 float height = terrain.SampleHeight(new Vector3(cellX, 0, cellZ)) + pos.y;
 
                 Gizmos.color = buildableGrid[x, z] ? Color.green : Color.red;
