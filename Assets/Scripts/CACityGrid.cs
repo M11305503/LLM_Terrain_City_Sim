@@ -13,6 +13,9 @@ public enum CellType
 
 public class CACityGrid : MonoBehaviour
 {
+    [Header("細胞演化參數包（可由 LLM 驅動）")]
+    public CityEvolutionParams evolutionParams = new CityEvolutionParams();
+
     public BuildableGrid buildableGrid; // Inspector 指定
 
     [Header("格子參數")]
@@ -55,7 +58,6 @@ public class CACityGrid : MonoBehaviour
         {
             for (int z = 0; z < gridZ; z++)
             {
-                // 只要不能建築，直接設成公園
                 cityTypeGrid[x, z] = (buildable != null && !buildable[x, z]) ? CellType.Park : CellType.Residential;
             }
         }
@@ -63,7 +65,6 @@ public class CACityGrid : MonoBehaviour
 
     public void SetInitialSeeds()
     {
-        // 初始化時保證所有不可建築格都設成 Park
         var buildable = buildableGrid.GetBuildableGrid();
         for (int x = 0; x < gridX; x++)
             for (int z = 0; z < gridZ; z++)
@@ -71,8 +72,6 @@ public class CACityGrid : MonoBehaviour
                     cityTypeGrid[x, z] = CellType.Park;
                 else
                     cityTypeGrid[x, z] = CellType.Residential;
-
-        // 其餘格子進行 seed 分布（下方操作都只動可建築格）
 
         // 中央高樓
         int cx = gridX / 2, cz = gridZ / 2, highriseR = UnityEngine.Random.Range(2, 5);
@@ -87,7 +86,7 @@ public class CACityGrid : MonoBehaviour
                 if (IsBuildable(x, z) && (x < 2 || z < 2 || x >= gridX - 2 || z >= gridZ - 2) && UnityEngine.Random.value < 0.7f)
                     cityTypeGrid[x, z] = CellType.Industrial;
 
-        // 隨機公園（可建築區才有可能再出現小量綠色）
+        // 隨機公園
         for (int i = 0; i < gridX * gridZ / 16; i++)
         {
             int rx = UnityEngine.Random.Range(0, gridX), rz = UnityEngine.Random.Range(0, gridZ);
@@ -96,10 +95,23 @@ public class CACityGrid : MonoBehaviour
         }
     }
 
-    // 判斷這個點是不是可建築（且不越界）
     private bool IsBuildable(int x, int z)
     {
         return x >= 0 && z >= 0 && x < gridX && z < gridZ && _latestBuildableGrid != null && _latestBuildableGrid[x, z];
+    }
+
+    public void ApplyLLMParameters(string json)
+    {
+        CityEvolutionParams p = JsonUtility.FromJson<CityEvolutionParams>(json);
+        evolutionParams = p;
+        UnityEngine.Debug.Log("已套用 LLM 參數包：" + json);
+    }
+
+    [ContextMenu("用範例參數包套用 LLM")]
+    public void ApplyExampleLLMParams()
+    {
+        string json = "{\"baseHighriseProb\":0.18,\"baseIndustrialProb\":0.07,\"highriseClusterBoost\":0.15,\"industrialClusterBoost\":0.09,\"parkSpreadProb\":0.5}";
+        ApplyLLMParameters(json);
     }
 
     public void StepAutomaton()
@@ -107,33 +119,37 @@ public class CACityGrid : MonoBehaviour
         var nextGrid = new CellType[gridX, gridZ];
         var buildable = buildableGrid.GetBuildableGrid();
 
+        // 從 evolutionParams 讀參數
+        float baseHighriseProb = evolutionParams.baseHighriseProb;
+        float baseIndustrialProb = evolutionParams.baseIndustrialProb;
+        float highriseClusterBoost = evolutionParams.highriseClusterBoost;
+        float industrialClusterBoost = evolutionParams.industrialClusterBoost;
+        float parkSpreadProb = evolutionParams.parkSpreadProb;
+
         for (int x = 0; x < gridX; x++)
+        {
             for (int z = 0; z < gridZ; z++)
             {
-                // 不可建築格永遠公園
+                // 不可建築格永遠為公園
                 if (buildable != null && !buildable[x, z])
                 {
                     nextGrid[x, z] = CellType.Park;
                     continue;
                 }
 
-                // 如果自己本來就是公園，並且有公園鄰居，可以有機率保留公園狀態
+                // 公園聚集蔓延，可設計參數控制
                 int parkNeighbors = CountNeighbors(x, z, CellType.Park);
-
-                // 如果周圍公園多，有機率變成公園
-                if (parkNeighbors >= 3 && UnityEngine.Random.value < 0.08f)
+                if (parkNeighbors >= 3 && UnityEngine.Random.value < parkSpreadProb)
                 {
                     nextGrid[x, z] = CellType.Park;
                     continue;
                 }
 
-                // 高樓聚集效應
                 int highriseNeighbors = CountNeighbors(x, z, CellType.Highrise);
-                int residentialNeighbors = CountNeighbors(x, z, CellType.Residential);
                 int industrialNeighbors = CountNeighbors(x, z, CellType.Industrial);
 
-                float highriseProb = 0.10f + 0.1f * highriseNeighbors; // 周圍高樓越多，變高樓機率越大
-                float industrialProb = 0.05f + 0.08f * industrialNeighbors; // 工業區也有聚集傾向
+                float highriseProb = baseHighriseProb + highriseClusterBoost * highriseNeighbors;
+                float industrialProb = baseIndustrialProb + industrialClusterBoost * industrialNeighbors;
                 float residentialProb = 1f - highriseProb - industrialProb;
 
                 float r = UnityEngine.Random.value;
@@ -144,6 +160,7 @@ public class CACityGrid : MonoBehaviour
                 else
                     nextGrid[x, z] = CellType.Residential;
             }
+        }
         cityTypeGrid = nextGrid;
     }
 
@@ -160,7 +177,6 @@ public class CACityGrid : MonoBehaviour
             }
         return cnt;
     }
-
 
     public CellType[,] GetCityTypeGrid() => cityTypeGrid;
 
@@ -185,5 +201,4 @@ public class CACityGrid : MonoBehaviour
                 }
         UnityEngine.Debug.Log($"住宅:{res} 高樓:{high} 工業:{ind} 公園:{park}");
     }
-
 }

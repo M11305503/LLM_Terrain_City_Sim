@@ -83,7 +83,6 @@ public class BuildingPlacer : MonoBehaviour
                 Vector3 pos = new Vector3(cellX, height + heightOffset, cellZ);
 
                 placedBuildings[x, z] = Instantiate(prefab, pos, Quaternion.identity, transform);
-                UnityEngine.Debug.Log($"Instantiate {prefab.name} at ({x},{z}) type:{cityTypeGrid[x, z]}");
                 count++;
             }
         }

@@ -47,7 +47,6 @@ public class BuildableGrid : MonoBehaviour
         }
 
         float percent = (float)buildableCount / (gridX * gridZ) * 100f;
-        Debug.Log($"✅ 可建築格子：{buildableCount}/{gridX * gridZ}（{percent:F1}%）");
     }
 
     float GetSlope(float worldX, float worldZ)
