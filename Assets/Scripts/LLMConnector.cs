@@ -1,4 +1,4 @@
-using UnityEngine;
+ï»¿using UnityEngine;
 using UnityEngine.Networking;
 using System.Collections;
 using System.Text.RegularExpressions;
@@ -10,7 +10,7 @@ using MiniJSON;
 public class LLMConnector : MonoBehaviour
 {
     public CACityGrid cityGrid;
-    [TextArea] public string userPrompt = "½Ğ³]­p¤@­Ó°ª¼Ó¤ñ¨Ò°ª¡B¦í¦v§Cªº²{¥N³£¥«°Ï°Ñ¼Æ";
+    [TextArea] public string userPrompt = "è«‹è¨­è¨ˆä¸€å€‹é«˜æ¨“æ¯”ä¾‹é«˜ã€ä½å®…ä½çš„ç¾ä»£éƒ½å¸‚å€åƒæ•¸";
 
     public void RequestLLMParams()
     {
@@ -20,13 +20,25 @@ public class LLMConnector : MonoBehaviour
     IEnumerator RequestLLMParamsCoroutine()
     {
         string apiUrl = "https://api.openai.com/v1/chat/completions";
-        string apiKey = "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"; // ½Ğ°È¥²«OÅ@ª÷Æ_¡I
+        string apiKey = "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"; // è«‹å‹™å¿…ä¿è­·é‡‘é‘°ï¼
+
+        string caRuleExplanation =
+        "ç´°èƒæ¼”åŒ–è¦å‰‡å¦‚ä¸‹ï¼šæ¯å€‹æ ¼å­çš„å‹æ…‹æ ¹æ“šä»¥ä¸‹æ©Ÿç‡æ±ºå®šã€‚" +
+        "è‹¥ä¸å¯å»ºç¯‰ï¼Œæ°¸é ç‚ºå…¬åœ’ã€‚" +
+        "è‹¥å‘¨åœæœ‰ä¸‰å€‹ä»¥ä¸Šå…¬åœ’ä¸”éš¨æ©Ÿæ•¸å°æ–¼ parkSpreadProbï¼Œå‰‡è®Šå…¬åœ’ã€‚" +
+        "å…¶é¤˜æƒ…æ³ä¸‹ï¼Œæ ¹æ“šä¸‹åˆ—å…¬å¼è¨ˆç®—ï¼š" +
+        "highriseProb = baseHighriseProb + highriseClusterBoost Ã— é«˜æ¨“é„°å±…æ•¸" +
+        "industrialProb = baseIndustrialProb + industrialClusterBoost Ã— å·¥æ¥­é„°å±…æ•¸" +
+        "residentialProb = 1 - highriseProb - industrialProb" +
+        "éš¨æ©Ÿå€¼å°æ–¼ highriseProb å‰‡è®Šé«˜æ¨“ï¼›ä»‹æ–¼ highriseProb èˆ‡ highriseProb+industrialProb å‰‡è®Šå·¥æ¥­ï¼›å¦å‰‡è®Šä½å®…ã€‚" +
+        "ä½ çµ¦çš„æ‰€æœ‰åƒæ•¸ï¼ˆbaseHighriseProb, baseIndustrialProb, highriseClusterBoost, industrialClusterBoost, parkSpreadProbï¼‰éƒ½æœƒç”¨åœ¨é€™å€‹å…¬å¼è£¡ã€‚";
 
         string systemPromptRaw =
-        "§A¬O¤@­Ó«°¥«¼ÒÀÀ°Ñ¼Æ³W¹º®v¡C½Ğ®Ú¾Ú¥Î¤á´y­z¡A¥ıÂ²µu»¡©ú§Aªº±À²z¡A¦Aª½±µ¦^¶Ç¤@²Õ¥»¨t²Î±M¥Îªº«°¥«²Ó­Mºt¤Æ°Ñ¼Æjson¡C" +
-        "®æ¦¡¬°¡G±À²z¡G¡]±À²z»¡©ú¡^°Ñ¼Æ¡G¡]jsonª«¥ó¡^¡C" +
-        "°Ñ¼Æª«¥ó¥²¶·¥u¥]§t baseHighriseProb¡BbaseIndustrialProb¡BhighriseClusterBoost¡BindustrialClusterBoost¡BparkSpreadProb ³o¤­­Ókey¡A¨Ò¦p¡G°Ñ¼Æ¡G{\"baseHighriseProb\":0.12,\"baseIndustrialProb\":0.22,\"highriseClusterBoost\":0.1,\"industrialClusterBoost\":0.09,\"parkSpreadProb\":0.03}¡C" +
-        "¤£­n¥Îmarkdown¡A¤£­nµ¹¥ô¦ó¦h¾lkey¡A¤£­n»¡©ú®æ¦¡¡A¥u¦^±À²z©M°Ñ¼Æjson¡C";
+        caRuleExplanation +
+        "ä½ æ˜¯ä¸€å€‹åŸå¸‚æ¨¡æ“¬åƒæ•¸è¦åŠƒå¸«ã€‚è«‹æ ¹æ“šç”¨æˆ¶æè¿°ï¼Œå…ˆç°¡çŸ­èªªæ˜ä½ çš„æ¨ç†ï¼Œå†ç›´æ¥å›å‚³ä¸€çµ„æœ¬ç³»çµ±å°ˆç”¨çš„åŸå¸‚ç´°èƒæ¼”åŒ–åƒæ•¸jsonã€‚" +
+        "æ ¼å¼ç‚ºï¼šæ¨ç†ï¼šï¼ˆæ¨ç†èªªæ˜ï¼‰åƒæ•¸ï¼šï¼ˆjsonç‰©ä»¶ï¼‰ã€‚" +
+        "åƒæ•¸ç‰©ä»¶å¿…é ˆåªåŒ…å« baseHighriseProbã€baseIndustrialProbã€highriseClusterBoostã€industrialClusterBoostã€parkSpreadProb é€™äº”å€‹keyï¼Œä¾‹å¦‚ï¼šåƒæ•¸ï¼š{\"baseHighriseProb\":0.1,\"baseIndustrialProb\":0.1,\"highriseClusterBoost\":0.05,\"industrialClusterBoost\":0.05,\"parkSpreadProb\":0.02}ã€‚" +
+        "ä¸è¦ç”¨markdownï¼Œä»¥åƒæ•¸ï¼š{\"baseHighriseProb\":0.1,\"baseIndustrialProb\":0.1,\"highriseClusterBoost\":0.05,\"industrialClusterBoost\":0.05,\"parkSpreadProb\":0.02}ä½œç‚ºåƒæ•¸åŸºæº–(é€™æ˜¯åŸºç¤åŸå¸‚)ï¼Œåªå›å®Œæ•´æ¨ç†å’Œåƒæ•¸jsonã€‚";
 
         string systemPrompt = systemPromptRaw.Replace("\"", "\\\"");
         string reqJson = "{" +
@@ -37,10 +49,10 @@ public class LLMConnector : MonoBehaviour
             "]" +
         "}";
 
-        // ¡¹¡¹¡¹ ¿é¥X§¹¾ã±À²z¹Lµ{ªºlog
-        UnityEngine.Debug.Log("<color=#80bfff>¡iLLM Debug¡juserPrompt: </color>" + userPrompt);
-        UnityEngine.Debug.Log("<color=#80bfff>¡iLLM Debug¡jsystemPrompt: </color>" + systemPrompt);
-        UnityEngine.Debug.Log("<color=#0080ff>¡iLLM Debug¡jREQ JSON: </color>" + reqJson);
+        // â˜…â˜…â˜… è¼¸å‡ºå®Œæ•´æ¨ç†éç¨‹çš„log
+        UnityEngine.Debug.Log("<color=#80bfff>ã€LLM Debugã€‘userPrompt: </color>" + userPrompt);
+        UnityEngine.Debug.Log("<color=#80bfff>ã€LLM Debugã€‘systemPrompt: </color>" + systemPrompt);
+        UnityEngine.Debug.Log("<color=#0080ff>ã€LLM Debugã€‘REQ JSON: </color>" + reqJson);
 
         UnityWebRequest req = new UnityWebRequest(apiUrl, "POST");
         byte[] bodyRaw = System.Text.Encoding.UTF8.GetBytes(reqJson);
@@ -54,47 +66,47 @@ public class LLMConnector : MonoBehaviour
         if (req.result == UnityWebRequest.Result.Success)
         {
             string response = req.downloadHandler.text;
-            UnityEngine.Debug.Log("<color=#008080>¡iLLM Debug¡jAPI ­ì©l¦^À³: </color>" + response);
+            UnityEngine.Debug.Log("<color=#008080>ã€LLM Debugã€‘API åŸå§‹å›æ‡‰: </color>" + response);
 
-            // ·s¼W³o¦æ
+            // æ–°å¢é€™è¡Œ
             string content = ExtractContentFromLLMResponse(response);
 
-            // §â­è­è©w¸qªº (string reasoning, string json) ExtractReasoningAndJson(string)
+            // æŠŠå‰›å‰›å®šç¾©çš„ (string reasoning, string json) ExtractReasoningAndJson(string)
             var (reasoning, paramJson) = ExtractReasoningAndJson(content);
 
-            UnityEngine.Debug.Log("<color=#e67e22>¡iLLM ±À²z²z¥Ñ¡j</color>" + reasoning);
-            UnityEngine.Debug.Log("<color=#2ecc71>¡iLLM Debug¡j¸ÑªR«áªºjson°Ñ¼Æ: </color>" + paramJson);
+            UnityEngine.Debug.Log("<color=#e67e22>ã€LLM æ¨ç†ç†ç”±ã€‘</color>" + reasoning);
+            UnityEngine.Debug.Log("<color=#2ecc71>ã€LLM Debugã€‘è§£æå¾Œçš„jsonåƒæ•¸: </color>" + paramJson);
 
             cityGrid.ApplyLLMParameters(paramJson);
         }
         else
         {
-            UnityEngine.Debug.LogError("API½Ğ¨D¥¢±Ñ: " + req.error);
+            UnityEngine.Debug.LogError("APIè«‹æ±‚å¤±æ•—: " + req.error);
         }
     }
 
     private (string reasoning, string json) ExtractReasoningAndJson(string content)
     {
-        // ¤ä´©¦hºØ±¡¹Òªº¸ÑªR
+        // æ”¯æ´å¤šç¨®æƒ…å¢ƒçš„è§£æ
         if (string.IsNullOrWhiteSpace(content))
             return ("", "{}");
 
-        // 1. ¹Á¸Õ§ì "°Ñ¼Æ¡G" «áªº json
-        var match = Regex.Match(content, @"°Ñ¼Æ[:¡G]\s*({[\s\S]*?})");
+        // 1. å˜—è©¦æŠ“ "åƒæ•¸ï¼š" å¾Œçš„ json
+        var match = Regex.Match(content, @"åƒæ•¸[:ï¼š]\s*({[\s\S]*?})");
         if (match.Success)
         {
             string json = match.Groups[1].Value.Trim();
-            // ±À²z³¡¤À
-            var reasoningMatch = Regex.Match(content, @"±À²z[:¡G]\s*([^\n\r]*)");
+            // æ¨ç†éƒ¨åˆ†
+            var reasoningMatch = Regex.Match(content, @"æ¨ç†[:ï¼š]\s*([^\n\r]*)");
             string reasoning = reasoningMatch.Success ? reasoningMatch.Groups[1].Value.Trim() : "";
             return (reasoning, json);
         }
-        // 2. fallback: ¥u­n¦³ json ª½±µ¨ú
+        // 2. fallback: åªè¦æœ‰ json ç›´æ¥å–
         var match2 = Regex.Match(content, @"({[\s\S]*?})");
         if (match2.Success)
             return ("", match2.Groups[1].Value.Trim());
 
-        // ³£¨S§ì¨ì
+        // éƒ½æ²’æŠ“åˆ°
         return ("", "{}");
     }
 
@@ -113,7 +125,7 @@ public class LLMConnector : MonoBehaviour
         if (message == null || !message.ContainsKey("content")) return "";
 
         string content = message["content"].ToString();
-        UnityEngine.Debug.Log("<color=orange>¡iLLM ¦^¶Çcontent¤º®e¡j</color>\n" + content);
+        UnityEngine.Debug.Log("<color=orange>ã€LLM å›å‚³contentå…§å®¹ã€‘</color>\n" + content);
         return content;
     }
 }

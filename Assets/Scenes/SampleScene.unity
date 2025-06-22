@@ -804,11 +804,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   evolutionParams:
-    baseHighriseProb: 0.05
-    baseIndustrialProb: 0.05
-    highriseClusterBoost: 0.05
+    baseHighriseProb: 0.2
+    baseIndustrialProb: 0.1
+    highriseClusterBoost: 0.1
     industrialClusterBoost: 0.05
-    parkSpreadProb: 0.25
+    parkSpreadProb: 0.02
   buildableGrid: {fileID: 1898968337}
   gridX: 25
   gridZ: 25
@@ -857,7 +857,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   cityGrid: {fileID: 1317033150}
-  userPrompt: "\u6211\u60F3\u8981\u751F\u6D3B\u6B65\u8ABF\u6BD4\u8F03\u8F15\u9B06\u7684\u57CE\u5E02"
+  userPrompt: "\u6240\u4EE5\u5982\u679C\u6211\u8981\u5546\u696D\u4E2D\u5FC3\uFF0C\u90A3\u53C3\u6578\u662F\u7531\u57FA\u790E\u53C3\u6578\u4E0A\u53BB\u589E\u52A0\u55CE\uFF1F"
 --- !u!4 &1452829672
 Transform:
   m_ObjectHideFlags: 0
